@@ -8,8 +8,9 @@ set -l commit (git -C $fish rev-parse HEAD)
 mkdir -p completions
 
 for completion in $share/completions/*.fish
-    # Skip if the completion has a corresponding function
-    if ! test -f $share/functions/(basename $completion)
+    set -l name (basename $completion)
+    # Skip if the completion is for builtins or has a corresponding vendored function
+    if ! contains $name (builtin -n) && ! test -f $share/functions/$name
         cp -f $completion completions/
     end
 end

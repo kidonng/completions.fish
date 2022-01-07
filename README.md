@@ -20,5 +20,5 @@
 
 ## Notes
 
--   Completions for builtin functions are not included in fishion. These completions may have been updated to support the latest features of builtin functions that are only available through a full build of fish from source.
+-   Completions for builtins and vendored functions are not included in fishion. These completions may have been updated to make use of latest features of fish which are only available through a full build from source.
 -   This project seeks to become the fish equivalent of [zsh-completions](https://github.com/zsh-users/zsh-completions), in the sense that it may include more completions that are not available from fish's source repository. However, contributions should always go to `fish-shell/fish-shell` first.
