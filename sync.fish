@@ -11,7 +11,7 @@ mkdir completions
 for completion in $share/completions/*.fish
     set -l name (basename $completion)
     # Skip if the completion is for builtins or has a corresponding vendored function
-    if ! contains $name (builtin -n) && ! test -f $share/functions/$name
+    if ! contains (string replace .fish "" $name) (builtin -n) && ! test -f $share/functions/$name
         cp $completion completions
     end
 end
