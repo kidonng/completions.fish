@@ -798,6 +798,10 @@ format:\tSpecify which information to show"
     end
 end
 
+function __fish_git_is_rebasing
+    test -e (__fish_git rev-parse --absolute-git-dir)/rebase-merge
+end
+
 # general options
 complete -f -c git -l help -d 'Display the manual of a git command'
 complete -f -c git -n __fish_git_needs_command -l version -d 'Display version'
@@ -898,6 +902,7 @@ complete -f -c git -n '__fish_git_using_command fetch' -s v -l verbose -d 'Be ve
 complete -f -c git -n '__fish_git_using_command fetch' -s a -l append -d 'Append ref names and object names'
 # TODO --upload-pack
 complete -f -c git -n '__fish_git_using_command fetch' -s f -l force -d 'Force update of local branches'
+complete -f -c git -n '__fish_git_using_command fetch' -s p -l prune -d 'Remove remote-tracking references that no longer exist on the remote'
 # TODO other options
 
 #### filter-branch
@@ -947,10 +952,11 @@ complete -f -c git -n "__fish_git_using_command remote; and __fish_seen_subcomma
 
 ### show
 complete -f -c git -n __fish_git_needs_command -a show -d 'Shows the last commit of a branch'
-complete -f -c git -n '__fish_git_using_command show' -a '(__fish_git_branches)'
-complete -f -c git -n '__fish_git_using_command show' -ka '(__fish_git_tags)' -d Tag
-complete -f -c git -n '__fish_git_using_command show' -ka '(__fish_git_commits)'
-complete -f -c git -n __fish_git_needs_rev_files -xa '(__fish_git_complete_rev_files)'
+complete -f -c git -n '__fish_git_using_command show; and not contains -- -- (commandline -opc)' -a '(__fish_git_branches)'
+complete -f -c git -n '__fish_git_using_command show; and not contains -- -- (commandline -opc)' -ka '(__fish_git_tags)' -d Tag
+complete -f -c git -n '__fish_git_using_command show; and not contains -- -- (commandline -opc)' -ka '(__fish_git_commits)'
+complete -f -c git -n '__fish_git_needs_rev_files; and not contains -- -- (commandline -opc)' -xa '(__fish_git_complete_rev_files)'
+complete -F -c git -n '__fish_git_using_command show; and contains -- -- (commandline -opc)'
 complete -f -c git -n '__fish_git_using_command show' -l format -d 'Pretty-print the contents of the commit logs in a given format' -a '(__fish_git_show_opt format)'
 complete -f -c git -n '__fish_git_using_command show' -l abbrev-commit -d 'Show only a partial hexadecimal commit object name'
 complete -f -c git -n '__fish_git_using_command show' -l no-abbrev-commit -d 'Show the full 40-byte hexadecimal commit object name'
@@ -1034,6 +1040,8 @@ complete -f -c git -n '__fish_git_using_command checkout' -s b -d 'Create a new 
 complete -f -c git -n '__fish_git_using_command checkout' -s t -l track -d 'Track a new branch'
 complete -f -c git -n '__fish_git_using_command checkout' -l theirs -d 'Keep staged changes'
 complete -f -c git -n '__fish_git_using_command checkout' -l ours -d 'Keep unmerged changes'
+complete -f -c git -n '__fish_git_using_command checkout' -l recurse-submodules -d 'Update the work trees of submodules'
+complete -f -c git -n '__fish_git_using_command checkout' -l no-recurse-submodules -d 'Do not update the work trees of submodules'
 # TODO options
 
 ### apply
@@ -1626,6 +1634,7 @@ complete -f -c git -n '__fish_git_using_command pull' -s a -l append -d 'Append 
 complete -f -c git -n '__fish_git_using_command pull' -s f -l force -d 'Force update of local branches'
 complete -f -c git -n '__fish_git_using_command pull' -s k -l keep -d 'Keep downloaded pack'
 complete -f -c git -n '__fish_git_using_command pull' -l no-tags -d 'Disable automatic tag following'
+complete -f -c git -n '__fish_git_using_command pull' -s p -l prune -d 'Remove remote-tracking references that no longer exist on the remote'
 # TODO --upload-pack
 complete -f -c git -n '__fish_git_using_command pull' -l progress -d 'Force progress status'
 complete -f -c git -n '__fish_git_using_command pull; and not __fish_git_branch_for_remote' -a '(__fish_git_remotes)' -d 'Remote alias'
@@ -1701,10 +1710,11 @@ complete -f -c git -n '__fish_git_using_command rebase' -a '(__fish_git_branches
 complete -f -c git -n '__fish_git_using_command rebase' -a '(__fish_git_heads)' -d Head
 complete -f -c git -n '__fish_git_using_command rebase' -a '(__fish_git_recent_commits)'
 complete -f -c git -n '__fish_git_using_command rebase' -a '(__fish_git_tags)' -d Tag
-complete -f -c git -n '__fish_git_using_command rebase' -l continue -d 'Restart the rebasing process'
-complete -f -c git -n '__fish_git_using_command rebase' -l abort -d 'Abort the rebase operation'
+complete -f -c git -n '__fish_git_using_command rebase; and __fish_git_is_rebasing' -l continue -d 'Restart the rebasing process'
+complete -f -c git -n '__fish_git_using_command rebase; and __fish_git_is_rebasing' -l abort -d 'Abort the rebase operation'
+complete -f -c git -n '__fish_git_using_command rebase; and __fish_git_is_rebasing' -l edit-todo -d 'Edit the todo list'
 complete -f -c git -n '__fish_git_using_command rebase' -l keep-empty -d "Keep the commits that don't change anything"
-complete -f -c git -n '__fish_git_using_command rebase' -l skip -d 'Restart the rebasing process by skipping the current patch'
+complete -f -c git -n '__fish_git_using_command rebase; and __fish_git_is_rebasing' -l skip -d 'Restart the rebasing process by skipping the current patch'
 complete -f -c git -n '__fish_git_using_command rebase' -s m -l merge -d 'Use merging strategies to rebase'
 complete -f -c git -n '__fish_git_using_command rebase' -s q -l quiet -d 'Be quiet'
 complete -f -c git -n '__fish_git_using_command rebase' -s v -l verbose -d 'Be verbose'
