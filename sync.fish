@@ -5,7 +5,7 @@ set -l repo https://github.com/fish-shell/fish-shell
 git clone --depth 1 $repo $fish
 set -l commit (git -C $fish rev-parse HEAD)
 
-mv completions{,.old}
+rm -r completions
 mkdir completions
 
 # Builtins should always use vendored completions
