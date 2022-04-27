@@ -979,7 +979,7 @@ complete -c git -n '__fish_git_using_command filter-branch' -s f -l force -d 'Fi
 ### remote
 set -l remotecommands add rm remove show prune update rename set-head set-url set-branches get-url
 complete -f -c git -n __fish_git_needs_command -a remote -d 'Manage set of tracked repositories'
-complete -f -c git -n '__fish_git_using_command remote' -a '(__fish_git_remotes)'
+complete -f -c git -n "__fish_git_using_command remote; and __fish_seen_subcommand_from $remotecommands" -a '(__fish_git_remotes)'
 complete -f -c git -n "__fish_git_using_command remote; and not __fish_seen_subcommand_from $remotecommands" -s v -l verbose -d 'Be verbose'
 complete -f -c git -n "__fish_git_using_command remote; and not __fish_seen_subcommand_from $remotecommands" -a add -d 'Adds a new remote'
 complete -f -c git -n "__fish_git_using_command remote; and not __fish_seen_subcommand_from $remotecommands" -a rm -d 'Removes a remote'
@@ -1611,8 +1611,8 @@ complete -f -c git -n '__fish_git_using_command merge' -l progress -d 'Force pro
 complete -f -c git -n '__fish_git_using_command merge' -l no-progress -d 'Force no progress status'
 complete -f -c git -n '__fish_git_using_command merge' -l allow-unrelated-histories -d 'Allow merging even when branches do not share a common history'
 complete -x -c git -n '__fish_git_using_command merge' -s m -d 'Set the commit message'
-complete -f -c git -n '__fish_git_using_command merge' -s rerere-autoupdate -d 'If possible, use previous conflict resolutions'
-complete -f -c git -n '__fish_git_using_command merge' -s no-rerere-autoupdate -d 'Do not use previous conflict resolutions'
+complete -f -c git -n '__fish_git_using_command merge' -l rerere-autoupdate -d 'If possible, use previous conflict resolutions'
+complete -f -c git -n '__fish_git_using_command merge' -l no-rerere-autoupdate -d 'Do not use previous conflict resolutions'
 complete -f -c git -n '__fish_git_using_command merge' -l abort -d 'Abort the current conflict resolution process'
 complete -f -c git -n '__fish_git_using_command merge' -l continue -d 'Conclude current conflict resolution process'
 
