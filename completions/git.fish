@@ -994,6 +994,7 @@ complete -f -c git -n '__fish_git_using_command show' -l expand-tabs -d 'Perform
 complete -f -c git -n '__fish_git_using_command show' -l no-expand-tabs -d 'Do not perform a tab expansion in the log message'
 complete -f -c git -n '__fish_git_using_command show' -l notes -k -a '(__fish_git_refs)' -d 'Show the notes that annotate the commit'
 complete -f -c git -n '__fish_git_using_command show' -l no-notes -d 'Do not show notes'
+complete -f -c git -n '__fish_git_using_command show' -s s -l no-patch -d 'Suppress diff output'
 complete -f -c git -n '__fish_git_using_command show' -l show-signature -d 'Check the validity of a signed commit object'
 
 
@@ -1792,8 +1793,8 @@ complete -f -c git -n __fish_git_needs_command -a rebase -d 'Forward-port local 
 complete -f -c git -n '__fish_git_using_command rebase' -a '(__fish_git_remotes)' -d 'Remote alias'
 complete -f -c git -n '__fish_git_using_command rebase' -a '(__fish_git_branches)'
 complete -f -c git -n '__fish_git_using_command rebase' -a '(__fish_git_heads)' -d Head
-complete -f -c git -n '__fish_git_using_command rebase' -a '(__fish_git_recent_commits)'
-complete -f -c git -n '__fish_git_using_command rebase' -a '(__fish_git_tags)' -d Tag
+complete -f -c git -n '__fish_git_using_command rebase' -a '(__fish_git_tags)' -d Tag -k
+complete -f -c git -n '__fish_git_using_command rebase' -a '(__fish_git_recent_commits)' -k
 complete -f -c git -n '__fish_git_using_command rebase; and __fish_git_is_rebasing' -l continue -d 'Restart the rebasing process'
 complete -f -c git -n '__fish_git_using_command rebase; and __fish_git_is_rebasing' -l abort -d 'Abort the rebase operation'
 complete -f -c git -n '__fish_git_using_command rebase; and __fish_git_is_rebasing' -l edit-todo -d 'Edit the todo list'
