@@ -12,6 +12,9 @@ mkdir completions
 set -l skip (builtin -n)
 # These are placeholders and will invalidate actual completions
 set -a skip brew docker
+# Remove when fish 3.4.1 is outdated
+# https://github.com/fish-shell/fish-shell/issues/8987
+set -a skip git
 
 for completion in $share/completions/*.fish
     set -l name (basename $completion)
