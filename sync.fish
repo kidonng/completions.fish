@@ -12,9 +12,6 @@ mkdir completions
 set -l skip (builtin -n)
 # These are placeholders and will invalidate actual completions
 set -a skip brew docker
-# Remove when fish 3.4.1 is outdated
-# https://github.com/fish-shell/fish-shell/issues/8987
-set -a skip git
 
 for completion in $share/completions/*.fish
     set -l name (basename $completion)
@@ -22,6 +19,10 @@ for completion in $share/completions/*.fish
     if ! contains (string replace .fish "" $name) $skip && ! test -f $share/functions/$name
         cp $completion completions
     end
+end
+
+for patch in patches/*.patch
+    patch -p2 <$patch
 end
 
 # `test -n` doesn't work somehow
