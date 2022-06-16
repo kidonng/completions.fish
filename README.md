@@ -6,7 +6,7 @@
 
 ## Installation
 
-**Note**: this project targets the latest release version of fish, which is now [3.4.1](https://github.com/fish-shell/fish-shell/releases/tag/3.4.1).
+**Note**: this project targets the latest release version of fish, which is now [3.5.0](https://github.com/fish-shell/fish-shell/releases/tag/3.5.0).
 
 -   [plug.fish](https://github.com/kidonng/plug.fish)
 
