@@ -7,7 +7,8 @@
 set -l ip_commands link address addrlabel route rule neigh ntable tunnel tuntap maddr mroute mrule monitor xfrm netns l2tp tcp_metrics
 set -l ip_addr a ad add addr addre addres address
 set -l ip_link l li lin link
-set -l ip_all_commands $ip_commands $ip_addr $ip_link
+set -l ip_route r ro rou rout route
+set -l ip_all_commands $ip_commands $ip_addr $ip_link $ip_route
 
 function __fish_ip_commandwords
     set -l skip 0
@@ -177,7 +178,7 @@ end
 
 function __fish_ip_device
     command ip -o link show | while read -l a b c
-        printf '%s\t%s\n' (string replace ':' '' -- $b) Device
+        printf '%s\t%s\n' (string replace -r '(@.*)?:' '' -- $b) Device
     end
 end
 
@@ -362,6 +363,21 @@ function __fish_complete_ip
                                     gso_max_segs
                         end
                     case delete
+                        switch $cmd[-2]
+                            case delete
+                                __fish_ip_device
+                                echo dev
+                                echo group
+                            case dev
+                                __fish_ip_device
+                            case group
+                            case type
+                                __fish_ip_types
+                            case '*'
+                                if not set -q cmd[6]
+                                    echo type
+                                end
+                        end
                     case set
                         switch $cmd[-2]
                             case type
@@ -400,6 +416,27 @@ function __fish_complete_ip
                         end
                     case show
                     case help
+                end
+            end
+        case route
+            if not set -q cmd[3]
+                printf '%s\t%s\n' add "Add new route" \
+                    change "Change route" \
+                    append "Append route" \
+                    replace "Change or add new route" \
+                    delete "Delete route" \
+                    show "List routes" \
+                    flush "Flush routing tables" \
+                    get "Get a single route" \
+                    save "Save routing table to stdout" \
+                    showdump "Show saved routing table from stdin" \
+                    restore "Restore routing table from stdin"
+            else
+                # TODO: switch on $cmd[2] and complete subcommand specific arguments
+                # for now just complete device names when dev was the last token
+                switch $cmd[-2]
+                    case dev
+                        __fish_ip_device
                 end
             end
         case netns
@@ -453,6 +490,7 @@ complete -f -c ip
 complete -f -c ip -a '(__fish_complete_ip)'
 complete -f -c ip -n "not __fish_seen_subcommand_from $ip_all_commands" -a "$ip_commands"
 # Yes, ip only takes options before "objects"
+complete -c ip -s h -l human -d "Output statistics with human readable values" -n "not __fish_seen_subcommand_from $ip_commands"
 complete -c ip -s b -l batch -d "Read commands from file or stdin" -n "not __fish_seen_subcommand_from $ip_commands"
 complete -c ip -l force -d "Don't terminate on errors in batch mode" -n "not __fish_seen_subcommand_from $ip_commands"
 complete -c ip -s V -l Version -d "Print the version" -n "not __fish_seen_subcommand_from $ip_commands"
@@ -463,10 +501,17 @@ complete -c ip -f -s f -l family -d "The protocol family to use" -a "inet inet6 
 complete -c ip -f -s 4 -d "Short for --family inet" -n "not __fish_seen_subcommand_from $ip_commands"
 complete -c ip -f -s 6 -d "Short for --family inet6" -n "not __fish_seen_subcommand_from $ip_commands"
 complete -c ip -f -s B -d "Short for --family bridge" -n "not __fish_seen_subcommand_from $ip_commands"
-complete -c ip -f -s D -d "Short for --family decnet" -n "not __fish_seen_subcommand_from $ip_commands"
-complete -c ip -f -s I -d "Short for --family ipx" -n "not __fish_seen_subcommand_from $ip_commands"
-complete -c ip -f -s O -d "Short for --family link" -n "not __fish_seen_subcommand_from $ip_commands"
+complete -c ip -f -s M -d "Short for --family mpls" -n "not __fish_seen_subcommand_from $ip_commands"
+complete -c ip -f -s 0 -d "Short for --family link" -n "not __fish_seen_subcommand_from $ip_commands"
 complete -c ip -f -s o -l oneline -d "Output on one line" -n "not __fish_seen_subcommand_from $ip_commands"
 complete -c ip -f -s r -l resolve -d "Resolve names and print them instead of addresses" -n "not __fish_seen_subcommand_from $ip_commands"
-complete -c ip -f -s n -l net -l netns -d "Use specified network namespace" -n "not __fish_seen_subcommand_from $ip_commands"
+complete -c ip -f -s n -l netns -d "Use specified network namespace" -n "not __fish_seen_subcommand_from $ip_commands"
 complete -c ip -f -s a -l all -d "Execute command for all objects" -n "not __fish_seen_subcommand_from $ip_commands"
+complete -c ip -f -s c -l color -d "Configure color output" -n "not __fish_seen_subcommand_from $ip_commands"
+complete -c ip -f -s t -l timestamp -d "Display current time when using monitor" -n "not __fish_seen_subcommand_from $ip_commands"
+complete -c ip -f -o ts -l tshort -d "Like -timestamp, but shorter format" -n "not __fish_seen_subcommand_from $ip_commands"
+complete -c ip -f -o rc -l rcvbuf -d "Set the netlink socket receive buffer size" -n "not __fish_seen_subcommand_from $ip_commands"
+complete -c ip -f -o iec -d "Print human readable rates in IEC units" -n "not __fish_seen_subcommand_from $ip_commands"
+complete -c ip -f -o br -l brief -d "Print only basic information in a tabular format" -n "not __fish_seen_subcommand_from $ip_commands"
+complete -c ip -f -s j -l json -d "Output results in JSON" -n "not __fish_seen_subcommand_from $ip_commands"
+complete -c ip -f -s p -l pretty -d "Output results in pretty JSON" -n "not __fish_seen_subcommand_from $ip_commands"
