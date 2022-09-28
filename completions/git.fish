@@ -2285,6 +2285,48 @@ complete -f -c git -n '__fish_git_using_command config' -l includes -d 'Respect 
 complete -f -c git -n '__fish_git_using_command config' -l show-origin -d 'Show origin of configuration'
 complete -f -c git -n '__fish_git_using_command config' -n '__fish_seen_argument get' -l default -d 'Use default value when missing entry'
 
+### for-each-ref
+complete -f -c git -n __fish_git_needs_command -a "for-each-ref" -d "Format and output info on each ref"
+complete -f -c git -n '__fish_git_using_command for-each-ref' -l count -d "Limit to n results"
+# Any one of --shell, --perl, --python, or --tcl
+set -l for_each_ref_interpreters shell perl python tcl
+for intr in $for_each_ref_interpreters
+    complete -f -c git -n '__fish_git_using_command for-each-ref' \
+        -n "not __fish_seen_argument --$for_each_ref_interpreters" \
+        -l $intr -d "%(fieldname) placeholders are $intr scripts"
+end
+complete -f -c git -n '__fish_git_using_command for-each-ref' -x -l format -d "Format string with %(fieldname) placeholders"
+complete -f -c git -n '__fish_git_using_command for-each-ref' -f -l color -d "When to color" -a "always never auto"
+complete -f -c git -n '__fish_git_using_command for-each-ref' -l points-at -d "Only list refs pointing at object" -ka '(__fish_git_commits)'
+complete -f -c git -n '__fish_git_using_command for-each-ref' -x -l merged -d "Only list refs reachable from specified commit" -ka '(__fish_git_commits)'
+complete -f -c git -n '__fish_git_using_command for-each-ref' -x -l no-merged -d "Only list refs not reachable from specified commit" -ka '(__fish_git_commits)'
+complete -f -c git -n '__fish_git_using_command for-each-ref' -x -l contains -d "Only list refs containing the specified commit" -ka '(__fish_git_commits)'
+complete -f -c git -n '__fish_git_using_command for-each-ref' -x -l no-contains -d "Only list refs not containing the specified commit" -ka '(__fish_git_commits)'
+complete -f -c git -n '__fish_git_using_command for-each-ref' -x -l ignore-case -d "Sorting and filtering refs are case insensitive"
+
+### subcommands supporting --sort (XXX: list may not be complete!)
+set -l sortcommands branch for-each-ref tag
+# A list of keys one could reasonably sort refs by. This isn't the list of all keys that
+# can be used as any git internal key for a ref may be used here, sorted by binary value.
+function __fish_git_sort_keys
+    echo -objectsize\tSize of branch or commit
+    echo -authordate\tWhen the latest commit was actually made
+    echo -commiterdate\tWhen the branch was last committed or rebased
+    echo -creatordate\tWhen the latest commit or tag was created
+    echo -creator\tThe name of the commit author
+    echo -objectname\tThe complete SHA1
+    echo -objectname:short\tThe shortest non-ambiguous SHA1
+    echo -refname\tThe complete, unambiguous git ref name
+    echo -refname:short\tThe shortest non-ambiguous ref name
+    echo -author\tThe name of the author of the latest commit
+    echo -committer\tThe name of the person who committed latest
+    echo -tagger\tThe name of the person who created the tag
+    echo -authoremail\tThe email of the author of the latest commit
+    echo -commiteremail\tThe email of the person who committed last
+    echo -taggeremail\tThe email of the person who created the tag
+end
+complete -f -c git -n "__fish_seen_subcommand_from $sortcommands" -l sort -d 'Sort results by' -a "(__fish_git_sort_keys)"
+
 ## Custom commands (git-* commands installed in the PATH)
 complete -c git -n __fish_git_needs_command -a '(__fish_git_custom_commands)' -d 'Custom command'
 
