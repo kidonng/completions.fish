@@ -51,11 +51,10 @@ function __fish_git_recent_commits
 end
 
 function __fish_git_branches
-    # This is much faster than using `git branch`,
-    # and avoids having to deal with localized "detached HEAD" messages.
-    __fish_git for-each-ref --format='%(refname)' refs/heads/ refs/remotes/ 2>/dev/null \
-        | string replace -r '^refs/heads/(.*)$' '$1\tLocal Branch' \
-        | string replace -r '^refs/remotes/(.*)$' '$1\tRemote Branch'
+    # This is much faster than using `git branch` and avoids dealing with localized "detached HEAD" messages.
+    # We intentionally only sort local branches by recency. See discussion in #9248.
+    __fish_git for-each-ref --format='%(refname:strip=2)%09Local Branch' --sort=-committerdate refs/heads/ 2>/dev/null
+    __fish_git for-each-ref --format='%(refname:strip=2)%09Remote Branch' refs/remotes/ 2>/dev/null
 end
 
 function __fish_git_submodules
@@ -64,8 +63,7 @@ function __fish_git_submodules
 end
 
 function __fish_git_local_branches
-    __fish_git for-each-ref --format='%(refname:strip=2)' refs/heads/ 2>/dev/null \
-        | string replace -rf '.*' '$0\tLocal Branch'
+    __fish_git for-each-ref --format='%(refname:strip=2)%09Local Branch' --sort=-committerdate refs/heads/ 2>/dev/null
 end
 
 function __fish_git_unique_remote_branches
@@ -1110,8 +1108,8 @@ complete -F -c git -n '__fish_git_using_command am' -l include -d 'Pass --includ
 complete -f -c git -n '__fish_git_using_command am' -l reject -d 'Pass --reject to git apply'
 complete -x -f git -n '__fish_git_using_command am' -l patch-format -a 'mbox mboxrd stgit stgit-series hg' -d 'Specify the patch format'
 complete -f -c git -n '__fish_git_using_command am' -s i -l interactive -d 'Run interactively'
-complete -f -c git -n '__fish_git_using_command am' -l commiter-date-is-author-date -d 'Treat commiter date as author date'
-complete -f -c git -n '__fish_git_using_command am' -l ignore-date -d 'Treat author date as commiter date'
+complete -f -c git -n '__fish_git_using_command am' -l committer-date-is-author-date -d 'Treat committer date as author date'
+complete -f -c git -n '__fish_git_using_command am' -l ignore-date -d 'Treat author date as committer date'
 complete -f -c git -n '__fish_git_using_command am' -l skip -d 'Skip current patch'
 complete -x -c git -n '__fish_git_using_command am' -s S -l gpg-sign -a '(type -q gpg && __fish_complete_gpg_key_id gpg)' -d 'Sign commits with gpg'
 complete -f -c git -n '__fish_git_using_command am' -l no-gpg-sign -d 'Do not sign commits'
@@ -2312,19 +2310,19 @@ set -l sortcommands branch for-each-ref tag
 function __fish_git_sort_keys
     echo -objectsize\tSize of branch or commit
     echo -authordate\tWhen the latest commit was actually made
-    echo -commiterdate\tWhen the branch was last committed or rebased
+    echo -committerdate\tWhen the branch was last committed or rebased
     echo -creatordate\tWhen the latest commit or tag was created
-    echo -creator\tThe name of the commit author
-    echo -objectname\tThe complete SHA1
-    echo -objectname:short\tThe shortest non-ambiguous SHA1
-    echo -refname\tThe complete, unambiguous git ref name
-    echo -refname:short\tThe shortest non-ambiguous ref name
-    echo -author\tThe name of the author of the latest commit
-    echo -committer\tThe name of the person who committed latest
-    echo -tagger\tThe name of the person who created the tag
-    echo -authoremail\tThe email of the author of the latest commit
-    echo -commiteremail\tThe email of the person who committed last
-    echo -taggeremail\tThe email of the person who created the tag
+    echo creator\tThe name of the commit author
+    echo objectname\tThe complete SHA1
+    echo objectname:short\tThe shortest non-ambiguous SHA1
+    echo refname\tThe complete, unambiguous git ref name
+    echo refname:short\tThe shortest non-ambiguous ref name
+    echo author\tThe name of the author of the latest commit
+    echo committer\tThe name of the person who committed latest
+    echo tagger\tThe name of the person who created the tag
+    echo authoremail\tThe email of the author of the latest commit
+    echo committeremail\tThe email of the person who committed last
+    echo taggeremail\tThe email of the person who created the tag
 end
 complete -f -c git -n "__fish_seen_subcommand_from $sortcommands" -l sort -d 'Sort results by' -a "(__fish_git_sort_keys)"
 
