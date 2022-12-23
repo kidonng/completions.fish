@@ -1,0 +1,6 @@
+complete -c oksh -s c -d 'Specify commands to run'
+complete -c oksh -s i -d 'Use interactive mode'
+complete -c oksh -s l -d 'Use login shell'
+complete -c oksh -s p -d 'Use privileged shell'
+complete -c oksh -s r -d 'Use restricted shell'
+complete -c oksh -s c -d 'Run commands from stdin'
