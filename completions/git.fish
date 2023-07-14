@@ -152,12 +152,6 @@ function __fish_git_files
     contains -- copied $argv; and set -l copied
     and set -l copied_desc "Copied file"
 
-    # A literal "?" for use in `case`.
-    set -l q '\\?'
-    if status test-feature qmark-noglob
-        set q '?'
-    end
-    set -l use_next
     # git status --porcelain gives us all the info we need, in a format we don't.
     # The v2 format has better documentation and doesn't use " " to denote anything,
     # but it's only been added in git 2.11.0, which was released November 2016.
@@ -183,13 +177,35 @@ function __fish_git_files
     # We explicitly enable globs so we can use that to match the current token.
     set -l git_opt -c status.relativePaths -c core.quotePath=
 
+    # If the token starts with `./`, we need to prepend that
+    string match -q './*' -- (commandline -ct)
+    and set -l rel ./
+    or set -l rel
+
+    # If the token starts with `:`, it's from the repo root
+    string match -q ':*' -- (commandline -ct)
+    and set -l colon 1
+    or set -l colon
+
     # We pick the v2 format if we can, because it shows relative filenames (if used without "-z").
     # We fall back on the v1 format by reading git's _version_, because trying v2 first is too slow.
     set -l ver (__fish_git --version | string replace -rf 'git version (\d+)\.(\d+)\.?.*' '$1\n$2')
     # Version >= 2.11.* has the v2 format.
     if test "$ver[1]" -gt 2 2>/dev/null; or test "$ver[1]" -eq 2 -a "$ver[2]" -ge 11 2>/dev/null
-        __fish_git $git_opt status --porcelain=2 $status_opt \
-            | while read -la -d ' ' line
+        set -l stats (__fish_git $git_opt status --porcelain=2 $status_opt)
+        if set -ql untracked
+            # Fast path for untracked files - it is extremely easy to get a lot of these,
+            # so we handle them first
+            set -l files (string match -rg '^\? "?(.*)"?' -- $stats)
+            set stats (string match -rv '^\? ' -- $stats)
+            printf "$rel%s\n" $files\t$untracked_desc
+            if set -ql colon[1]
+                or set files (string match '../*' -- $files)
+                set files (path resolve -- $files | string replace -- "$root/" ":/:")
+                and printf '%s\n' $files\t$untracked_desc
+            end
+        end
+        printf %s\n $stats | while read -la -d ' ' line
             set -l file
             set -l desc
             # The basic status format is "XY", where X is "our" state (meaning the staging area),
@@ -309,12 +325,6 @@ function __fish_git_files
                     set -ql deleted_staged
                     and set file "$line[9..-1]"
                     and set desc $staged_deleted_desc
-                case "$q"' *'
-                    # Untracked
-                    # "? <path>" - print from element 2 on.
-                    set -ql untracked
-                    and set file "$line[2..-1]"
-                    and set desc $untracked_desc
                 case '! *'
                     # Ignored
                     # "! <path>" - print from element 2 on.
@@ -331,17 +341,12 @@ function __fish_git_files
                 # If this contains newlines or tabs,
                 # there is nothing we can do, but that's a general issue with scripted completions.
                 set file (string trim -c \" -- $file)
-                # The relative filename.
-                if string match -q './*' -- (commandline -ct)
-                    printf './%s\n' $file\t$desc
-                else
-                    printf '%s\n' "$file"\t$desc
-                end
+                # The (possibly relative) filename.
+                printf "$rel%s\n" "$file"\t$desc
                 # Now from repo root.
                 # Only do this if the filename isn't a simple child,
                 # or the current token starts with ":"
-                if string match -q '../*' -- $file
-                    or string match -q ':*' -- (commandline -ct)
+                if set -ql colon[1]; or string match -q '../*' -- $file
                     set -l fromroot (builtin realpath -- $file 2>/dev/null)
                     # `:` starts pathspec "magic", and the second `:` terminates it.
                     # `/` is the magic letter for "from repo root".
@@ -354,6 +359,16 @@ function __fish_git_files
         end
     else
         # v1 format logic
+        # This is pretty terrible and reuqires us to do a lot of weird work.
+
+        # A literal "?" for use in `case`.
+        set -l q '\\?'
+        if status test-feature qmark-noglob
+            set q '?'
+        end
+        # Whether we need to use the next line - some entries have two lines.
+        set -l use_next
+
         # We need to compute relative paths on our own, which is slow.
         # Pre-remove the root at least, so we have fewer components to deal with.
         set -l _pwd_list (string replace "$root/" "" -- $PWD/ | string split /)
@@ -481,13 +496,12 @@ function __fish_git_files
                 set -a file (string join / -- $previous)
 
                 # The filename with ":/:" prepended.
-                if string match -q '../*' -- $file
-                    or string match -q ':*' -- (commandline -ct)
+                if set -ql colon[1]; or string match -q '../*' -- $file
                     set file (string replace -- "$root/" ":/:" "$root/$relfile")
                 end
 
                 if test "$root/$relfile" -ef "$relfile"
-                    and not string match -q ':*' -- (commandline -ct)
+                    and not set -ql colon[1]
                     set file $relfile
                 end
 
