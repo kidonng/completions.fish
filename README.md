@@ -16,9 +16,7 @@
 
 -   [Fisher](https://github.com/jorgebucaran/fisher)
 
-    ```fish
-    fisher install kidonng/fishion
-    ```
+    [Fisher is unsupported](https://github.com/kidonng/fishion/issues/1) due to technical reasons.
 
 ## Notes
 
