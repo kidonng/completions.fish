@@ -5,8 +5,9 @@ set --local repo https://github.com/fish-shell/fish-shell
 git clone --depth 1 $repo $fish
 set --local commit (git -C $fish rev-parse HEAD)
 
-rm -r completions
-mkdir completions
+set --local fishion completions/fishion
+rm -r $fishion
+mkdir -p $fishion
 
 # Builtins should always use vendored completions
 set --local skip (builtin --names)
@@ -20,7 +21,7 @@ for completion in $share/completions/*.fish
     set --local name (path basename $completion)
     # Skip if the completion is in skip list or has a corresponding vendored function
     if ! contains (path change-extension "" $name) $skip && ! test -f $share/functions/$name
-        cp $completion completions
+        cp $completion $fishion
     end
 end
 
