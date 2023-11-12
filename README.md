@@ -9,12 +9,7 @@ Latest completions from [fish's source repository](https://github.com/fish-shell
 > [!IMPORTANT]
 > Latest version of fish is recommended.
 
-- [plug.fish](https://github.com/kidonng/plug.fish)
-
-  ```fish
-  plug install kidonng/fishion
-  ```
-
+- [plug.fish](https://github.com/kidonng/plug.fish), plugin manager also made by me
 - [Fisher](https://github.com/jorgebucaran/fisher)
 
   ```fish
