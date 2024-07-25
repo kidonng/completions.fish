@@ -1,22 +1,36 @@
-# 💅🐟 fishion
+# 💅🐟 completions.fish
 
-> fish + completion = fishion
+> Latest fish completions as a plugin
 
-Latest completions from [fish's source repository](https://github.com/fish-shell/fish-shell), [syncs](sync.fish) every day. That's it.
+Enjoy latest completions [synced](sync.fish) from [fish's source repository](https://github.com/fish-shell/fish-shell) every day, without compiling anything yourself.
+
+- [Release announcement](https://github.com/fish-shell/fish-shell/discussions/8490)
 
 ## Installation
 
-> [!IMPORTANT]
-> Latest version of fish is recommended.
+- [plug.fish](https://github.com/kidonng/plug.fish)
 
-- [plug.fish](https://github.com/kidonng/plug.fish), plugin manager also made by me
+  ```fish
+  set plugins \
+    https://github.com/kidonng/plug.fish \
+    https://github.com/kidonng/completions.fish
+  ```
+
 - [Fisher](https://github.com/jorgebucaran/fisher)
 
   ```fish
-  fisher install kidonng/fishion
+  fisher install kidonng/completions.fish
   ```
 
 ## Notes
 
-- **Completions for builtins and vendored functions are not included**. These are more likely to make use of latest features of fish which are only available through building from source.
-- In rare cases, other completions do not work on latest version of fish either. Please open an issue if you encounter any.
+- Completions for built-ins and vendored functions are excluded.
+
+  They are more likely to use unreleased features incompatible with latest release of fish.
+
+- If a completion is incompatible, you can revert to its original version:
+
+  ```fish
+  # Example: revert git completion
+  ln -s $__fish_data_dir/completions/git.fish $__fish_config_dir/completions
+  ```
