@@ -882,9 +882,16 @@ short\t<sha1> / <author> / <title line>
 medium\t<sha1> / <author> / <author date> / <title> / <commit msg>
 full\t<sha1> / <author> / <committer> / <title> / <commit msg>
 fuller\t<sha1> / <author> / <author date> / <committer> / <committer date> / <title> / <commit msg>
+reference\t<abbrev-hash> (<title-line>, <short-author-date>)
 email\t<sha1> <date> / <author> / <author date> / <title> / <commit msg>
+mboxrd\tLike email, but lines in the commit message starting with \"From \" are quoted with \">\"
 raw\tShow the entire commit exactly as stored in the commit object
-format:\tSpecify which information to show"
+format:\tSpecify which information to show
+"
+            __fish_git config -z --get-regexp '^pretty\.' 2>/dev/null | while read -lz key value
+                set -l name (string replace -r '^.*?\.' '' -- $key)
+                printf "%s\t%s\n" $name $value
+            end
     end
 end
 
