@@ -22,6 +22,12 @@ Enjoy latest completions [synced](sync.fish) from [fish's source repository](htt
   fisher install kidonng/completions.fish
   ```
 
+- [reef](https://github.com/danielb2/reef)
+
+  ```fish
+  reef add kidonng/completions.fish
+  ```
+
 ## Notes
 
 - Completions for built-ins and vendored functions are excluded.
