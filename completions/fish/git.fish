@@ -1047,6 +1047,9 @@ complete -x -c git -n '__fish_git_using_command diff log show range-diff' -l ws-
 complete -f -c git -n '__fish_git_using_command fetch pull' -l unshallow -d 'Convert a shallow repository to a complete one'
 complete -f -c git -n '__fish_git_using_command fetch pull' -l set-upstream -d 'Add upstream (tracking) reference'
 
+complete -x -c git -n '__fish_git_using_command fetch pull' -l recurse-submodules -a 'yes on-demand no' -d 'Recursively fetch submodules'
+complete -f -c git -n '__fish_git_using_command fetch pull' -l no-recurse-submodules -d 'Do not recursively fetch submodules'
+
 #### fetch
 complete -f -c git -n __fish_git_needs_command -a fetch -d 'Download objects from another repo'
 # Suggest "repository", then "refspec" - this also applies to e.g. push/pull
@@ -1683,6 +1686,18 @@ complete -f -c git -n '__fish_git_using_command grep' -l heading -d 'Show filena
 complete -f -c git -n '__fish_git_using_command grep' -l untracked -d 'Search in untracked files'
 complete -f -c git -n '__fish_git_using_command grep' -l no-index -d 'Search files in current directory that is not managed by Git'
 complete -f -c git -n '__fish_git_using_command grep' -l recurse-submodules -d 'Recursively search in each submodule'
+
+### history
+set -l git_history_commands reword split
+complete -f -c git -n __fish_git_needs_command -a history -d 'Rewrite history'
+complete -f -c git -n "__fish_git_using_command history" -n "not __fish_seen_subcommand_from $git_history_commands" -a reword -d 'Rewrite a commit message'
+complete -f -c git -n "__fish_git_using_command history" -n "not __fish_seen_subcommand_from $git_history_commands" -a split -d 'Split up a commit'
+
+complete -f -c git -n '__fish_git_using_command history' -n '__fish_seen_subcommand_from reword split' -l dry-run -d 'Do not update references'
+complete -x -c git -n '__fish_git_using_command history' -n '__fish_seen_subcommand_from reword split' -l update-refs -a 'branches head'
+complete -x -c git -n '__fish_git_using_command history' -n '__fish_seen_subcommand_from reword' -ka '(__fish_git_recent_commits)'
+complete -x -c git -n '__fish_git_using_command history' -n '__fish_seen_subcommand_from split' -n 'not contains -- -- (commandline -xpc)' -ka '(__fish_git_recent_commits)'
+complete -F -c git -n '__fish_git_using_command history' -n '__fish_seen_subcommand_from split' -n 'contains -- -- (commandline -xpc)'
 
 ### init
 complete -f -c git -n __fish_git_needs_command -a init -d 'Create an empty git repository'
