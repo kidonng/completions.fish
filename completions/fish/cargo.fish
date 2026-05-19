@@ -3,13 +3,14 @@
 ## --- WRITTEN MANUALLY ---
 
 function __fish_cargo
-    RUSTUP_AUTO_INSTALL=0 cargo --color=never $argv
+    set -l tmp $__fish_cargo_wrapping cargo --color=never $argv
+    RUSTUP_AUTO_INSTALL=0 $tmp
 end
 
 set -l __fish_cargo_subcommands (__fish_cargo --list 2>&1 | string replace -rf '^\s+([^\s]+)\s*(.*)' '$1\t$2' | string escape)
 
-complete -c cargo -f -c cargo -n __fish_use_subcommand -a "$__fish_cargo_subcommands"
-complete -c cargo -x -c cargo -n '__fish_seen_subcommand_from help' -a "$__fish_cargo_subcommands"
+complete -c cargo -f -n __fish_use_subcommand -a "$__fish_cargo_subcommands"
+complete -c cargo -x -n '__fish_seen_subcommand_from help' -a "$__fish_cargo_subcommands"
 
 for x in bench b build c check rustc t test
     complete -c cargo -x -n "__fish_seen_subcommand_from $x" -l bench -a "(__fish_cargo bench --bench 2>&1 | string replace -rf '^\s+' '')"
@@ -845,7 +846,7 @@ if command -q cargo-asm
     # Warning: this will build the project and can take time! We make sure to only call it if it's not a switch so completions
     # for --foo will always be fast.
     if command -q timeout
-        complete -c cargo -n "__fish_seen_subcommand_from asm; and not __fish_is_switch" -xa "(timeout 1 __fish_cargo asm)"
+        complete -c cargo -n "__fish_seen_subcommand_from asm; and not __fish_is_switch" -xa "(__fish_cargo_wrapping={timeout,1} __fish_cargo asm)"
     else
         complete -c cargo -n "__fish_seen_subcommand_from asm; and not __fish_is_switch" -xa "(__fish_cargo asm)"
     end
@@ -853,13 +854,14 @@ end
 
 # Determine whether the working directory is in a fish workspace.
 function __fish_cargo_is_in_fish_workspace
-    cargo metadata --offline --no-deps --format-version=1 2>/dev/null |
+    command -v jq >/dev/null
+    and __fish_cargo metadata --offline --no-deps --format-version=1 2>/dev/null |
         jq --exit-status -r '.packages | map(select(.name == "fish" and .homepage == "https://fishshell.com")) | any' >/dev/null
 end
 
 # The sed command is a hack to only activate the conditions in fish workspaces.
 # Ideally, this would be handled by the completion generator,
 # but `clap_complete` does not have this capability.
-COMPLETE=fish cargo xtask 2>/dev/null |
+COMPLETE=fish __fish_cargo xtask 2>/dev/null |
     sed 's/^complete /complete --condition __fish_cargo_is_in_fish_workspace /' |
     source
