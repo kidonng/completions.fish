@@ -32,5 +32,5 @@ Enjoy latest completions [synced](sync.fish) from [fish's source repository](htt
 
   ```fish
   # Example: revert git completion
-  ln -s $__fish_data_dir/completions/git.fish $__fish_config_dir/completions
+  status get-file completions/git.fish > $__fish_config_dir/completions
   ```
