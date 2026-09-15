@@ -3,7 +3,7 @@
 #
 
 # Test if we are using GNU tr
-if command tr --version >/dev/null 2>/dev/null
+if __fish_supports_version tr
     complete -c tr -x
     complete -c tr -s c -s C -l complement -d 'use the complement of SET1'
     complete -c tr -s d -l delete -d 'delete characters in SET1, do not translate'
@@ -31,7 +31,7 @@ else
     complete -c tr -s c -d 'Same as -C but complement the set of values in string1'
     complete -c tr -s d -d 'Delete characters in string1 from the input'
     complete -c tr -s s -d 'Squeeze runs of characters listed in the last operand into one'
-    complete -c tr -l u -d 'Guarantee that any output is unbuffered.'
+    complete -c tr -s u -d 'Guarantee that any output is unbuffered.'
 
     complete -c tr -a '[:alnum:]' -d 'alphanumeric characters'
     complete -c tr -a '[:alpha:]' -d 'alphabetic characters'
