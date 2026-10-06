@@ -568,7 +568,14 @@ function __fish_git_needs_rev_files
     __fish_git_using_command show; and string match -r "^[^-].*:" -- (commandline -xt)
 end
 
+# Complete revision ranges like "main..next" or "main...next".
+# With --require-range, complete a ref to "<ref>..", relying on "." suppressing
+# the trailing space so a second tab completes the other end.
 function __fish_git_ranges
+    set -l require_range false
+    if test "$argv[1]" = --require-range
+        set require_range true
+    end
     set -l both (commandline -xt | string replace -r '\.{2,3}' \n\$0\n)
     set -l from $both[1]
     set -l dots $both[2]
@@ -578,6 +585,8 @@ function __fish_git_ranges
         if commandline -ct | string match -q '*..*'
             # The cursor is right of a .. range operator, make sure to include them first.
             __fish_git_refs | string replace -r '' "$dots"
+        else if $require_range
+            __fish_git_refs | string replace -r '^([^\t]+)' '$1..'
         else
             __fish_git_refs | string replace \t "$dots"\t
         end
@@ -780,7 +789,7 @@ function __fish_git_stash_not_using_subcommand
     set cmd $cmd[(contains -i -- "stash" $cmd)..-1]
     set -q cmd[2]
     or return 0
-    contains -- $cmd[2] list show pop apply clear drop create save branch push
+    contains -- $cmd[2] list show pop apply clear drop create save branch push import export
     and return 1
     return 0
 end
@@ -840,6 +849,7 @@ function __fish_git_branch_for_remote
     set -q remote[1]
     or return 1
     __fish_git_branches | string replace -f -- "$remote/" ''
+    true
 end
 
 # Return 0 if the current token is a possible commit-hash with at least 3 characters
@@ -2142,7 +2152,7 @@ complete -f -c git -n '__fish_git_using_command pull' -s 6 -l ipv6 -d 'Use IPv6 
 
 ### range-diff
 complete -f -c git -n __fish_git_needs_command -a range-diff -d 'Compare two commit ranges'
-complete -f -c git -n '__fish_git_using_command range-diff' -ka '(__fish_git_ranges)'
+complete -f -c git -n '__fish_git_using_command range-diff' -ka '(__fish_git_ranges --require-range)'
 complete -f -c git -n '__fish_git_using_command range-diff' -l creation-factor -d 'Percentage by which creation is weighted'
 complete -f -c git -n '__fish_git_using_command range-diff' -l no-dual-color -d 'Use simple diff colors'
 
@@ -2486,6 +2496,8 @@ complete -f -c git -n '__fish_git_using_command stash' -n __fish_git_stash_not_u
 complete -f -c git -n '__fish_git_using_command stash' -n __fish_git_stash_not_using_subcommand -a save -d 'Save a new stash'
 complete -f -c git -n '__fish_git_using_command stash' -n __fish_git_stash_not_using_subcommand -a branch -d 'Create a new branch from a stash'
 complete -f -c git -n '__fish_git_using_command stash' -n __fish_git_stash_not_using_subcommand -a push -d 'Create a new stash with given files'
+complete -f -c git -n '__fish_git_using_command stash' -n __fish_git_stash_not_using_subcommand -a export -d 'Export stashes to a chain of commits'
+complete -f -c git -n '__fish_git_using_command stash' -n __fish_git_stash_not_using_subcommand -a import -d 'Import stashes from an exported commit'
 
 complete -f -c git -n '__fish_git_using_command stash' -n __fish_git_stash_is_push -a '(__fish_git_files modified deleted modified-staged-deleted)'
 complete -f -c git -n '__fish_git_using_command stash' -n __fish_git_stash_is_push -s a -l all -d 'Stash ignored and untracked files'
@@ -2496,7 +2508,10 @@ complete -f -c git -n '__fish_git_using_command stash' -n __fish_git_stash_is_pu
 complete -f -c git -n '__fish_git_using_command stash' -n __fish_git_stash_is_push -s S -l staged -d 'Stash only staged changes'
 complete -f -c git -n '__fish_git_using_command stash' -n __fish_git_stash_is_push -s u -l include-untracked -d 'Stash untracked files'
 
-complete -f -c git -n '__fish_git_using_command stash' -n '__fish_git_stash_using_command apply branch drop pop show' -ka '(__fish_git_complete_stashes)'
+complete -f -c git -n '__fish_git_stash_using_command export' -l print -d 'Print the exported stash chain object ID'
+complete -x -c git -n '__fish_git_stash_using_command export' -l to-ref -a '(__fish_git_refs)' -d 'Store the exported stash chain at the given ref'
+__fish_git_add_revision_completion -n '__fish_git_stash_using_command import'
+complete -f -c git -n '__fish_git_using_command stash' -n '__fish_git_stash_using_command apply branch drop pop show export' -ka '(__fish_git_complete_stashes)'
 
 ### config
 complete -f -c git -n __fish_git_needs_command -a config -d 'Set and read git configuration variables'
@@ -2798,7 +2813,7 @@ complete -f -c git -n '__fish_git_using_command send-email' -l smtp-server-port 
 complete -f -c git -n '__fish_git_using_command send-email' -l smtp-server-option -r
 complete -c git -n '__fish_git_using_command send-email' -l smtp-ssl-cert-path -r
 complete -f -c git -n '__fish_git_using_command send-email' -l smtp-user -r
-complete -f -c git -n '__fish_git_using_command send-email' -l smt-debug -ra '0 1' -d 'SMTP debug output'
+complete -f -c git -n '__fish_git_using_command send-email' -l smtp-debug -ra '0 1' -d 'SMTP debug output'
 complete -f -c git -n '__fish_git_using_command send-email' -l batch-size -r -d 'Reconnect after sending this many messages'
 complete -f -c git -n '__fish_git_using_command send-email' -l relogin-dleay -r -d 'Seconds to wait before reconnecting'
 complete -f -c git -n '__fish_git_using_command send-email' -l no-to -d 'Clear To:'
